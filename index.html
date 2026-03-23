@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Class GitHub Roster</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-bracket">{</span>
+        <span class="logo-text">ClassRepo</span>
+        <span class="logo-bracket">}</span>
+      </div>
+      <div class="header-meta">
+        <span id="student-count">0 students</span>
+        <button class="btn-admin" id="adminBtn">Admin</button>
+      </div>
+    </div>
+    <div class="header-line"></div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag">— GitHub Submission Portal</div>
+    <h1 class="hero-title">Submit Your Github ID.<br/><span class="accent"></span></h1>
+    <p class="hero-sub">Enter your details once. Your submission is locked after that. Contact me for any changes.</p>
+    <button class="btn-submit" id="openFormBtn">
+      <span class="btn-icon">+</span> Submit My Details
+    </button>
+  </section>
+
+  <!-- ROSTER TABLE -->
+  <section class="roster-section">
+    <div class="section-header">
+      <h2 class="section-title">Student Roster</h2>
+      <div class="search-wrap">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by name or roll no..." />
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th>Roll No.</th>
+            <th>Name</th>
+            <th>GitHub ID</th>
+            <th>Repo Name</th>
+            <th>Full Link</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody id="rosterBody">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">[ ]</div>
+        <p>No submissions yet. Be the first!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBMISSION MODAL -->
+  <div class="modal-overlay" id="formModal">
+    <div class="modal">
+      <button class="modal-close" id="closeFormBtn">✕</button>
+      <div class="modal-tag">New Submission</div>
+      <h2 class="modal-title">Your Details</h2>
+      <p class="modal-note">⚠ You can only submit once per session. After submitting, your entry is locked.</p>
+
+      <form id="submitForm" class="submit-form" novalidate>
+        <div class="field-group">
+          <label for="rollNum">Roll Number</label>
+          <input type="text" id="rollNum" placeholder="e.g. 101" autocomplete="off" />
+          <span class="field-error" id="rollErr"></span>
+        </div>
+        <div class="field-group">
+          <label for="stuName">Full Name</label>
+          <input type="text" id="stuName" placeholder="e.g. Rohan Verma" autocomplete="off" />
+          <span class="field-error" id="nameErr"></span>
+        </div>
+        <div class="field-group">
+          <label for="githubId">GitHub Username</label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">github.com/</span>
+            <input type="text" id="githubId" placeholder="your-username" autocomplete="off" />
+          </div>
+          <span class="field-error" id="gitErr"></span>
+        </div>
+        <div class="field-group">
+          <label for="repoUrl">Repository Name</label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">github.com/username/</span>
+            <input type="text" id="repoUrl" placeholder="random-c-programs" autocomplete="off" />
+          </div>
+          <span class="field-error" id="repoErr"></span>
+        </div>
+        <button type="submit" class="btn-form-submit">Submit & Lock Entry</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN MODAL -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal modal-admin">
+      <button class="modal-close" id="closeAdminBtn">✕</button>
+      <h2 class="modal-title">Admin Login</h2>
+
+      <!-- LOGIN FORM -->
+      <div id="adminLoginSection">
+        <form id="adminLoginForm" class="submit-form" novalidate>
+          <div class="field-group">
+            <label for="adminPass">Password</label>
+            <input type="password" id="adminPass" placeholder="Enter admin password" />
+            <span class="field-error" id="adminPassErr"></span>
+          </div>
+          <button type="submit" class="btn-form-submit">Login</button>
+        </form>
+      </div>
+
+      <!-- ADMIN PANEL -->
+      <div id="adminPanel" style="display:none;">
+        <p class="admin-welcome">✓ Logged in as Admin</p>
+        <div class="admin-table-wrap">
+          <table class="roster-table admin-table">
+            <thead>
+              <tr>
+                <th>Roll</th>
+                <th>Name</th>
+                <th>GitHub ID</th>
+                <th>Repo Name</th>
+                <th>Full Link</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminRosterBody"></tbody>
+          </table>
+        </div>
+        <button class="btn-danger" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <button class="modal-close" id="closeEditBtn">✕</button>
+      <div class="modal-tag">Edit Entry</div>
+      <h2 class="modal-title">Edit Student</h2>
+      <form id="editForm" class="submit-form" novalidate>
+        <input type="hidden" id="editId" />
+        <div class="field-group">
+          <label for="editRoll">Roll Number</label>
+          <input type="text" id="editRoll" />
+        </div>
+        <div class="field-group">
+          <label for="editName">Full Name</label>
+          <input type="text" id="editName" />
+        </div>
+        <div class="field-group">
+          <label for="editGithub">GitHub Username</label>
+          <input type="text" id="editGithub" />
+        </div>
+        <div class="field-group">
+          <label for="editRepo">Repository Name</label>
+          <input type="text" id="editRepo" placeholder="repo-name-only" />
+        </div>
+        <button type="submit" class="btn-form-submit">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
