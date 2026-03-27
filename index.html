@@ -12,11 +12,6 @@
   <!-- HEADER -->
   <header class="site-header">
     <div class="header-inner">
-      <div class="logo">
-        <span class="logo-bracket">{</span>
-        <span class="logo-text">ClassRepo</span>
-        <span class="logo-bracket">}</span>
-      </div>
       <div class="header-meta">
         <span id="student-count">0 students</span>
         <button class="btn-admin" id="adminBtn">Admin</button>
@@ -27,11 +22,11 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-tag">— GitHub Submission Portal</div>
+    <div class="hero-tag">~ GitHub Submission Portal</div>
     <h1 class="hero-title">Submit Your Github ID.<br/><span class="accent"></span></h1>
-    <p class="hero-sub">Enter your details once. Your submission is locked after that. Contact me for any changes.</p>
+    <p class="hero-sub">Enter your details once. Your submission is locked after that.</p>
     <button class="btn-submit" id="openFormBtn">
-      <span class="btn-icon">+</span> Submit My Details
+      <span class="btn-icon">+</span> Submit Your Details
     </button>
   </section>
 
@@ -48,6 +43,7 @@
       <table class="roster-table">
         <thead>
           <tr>
+            <th>Section</th>
             <th>Roll No.</th>
             <th>Name</th>
             <th>GitHub ID</th>
@@ -76,6 +72,11 @@
       <p class="modal-note">⚠ You can only submit once per session. After submitting, your entry is locked.</p>
 
       <form id="submitForm" class="submit-form" novalidate>
+        <div class="field-group">
+          <label for="section">Section</label>
+          <input type="text" id="section" placeholder="e.g. G2H" autocomplete="off" />
+          <span class="field-error" id="sectionErr"></span>
+        </div>
         <div class="field-group">
           <label for="rollNum">Roll Number</label>
           <input type="text" id="rollNum" placeholder="e.g. 23" autocomplete="off" />
@@ -133,6 +134,7 @@
             <thead>
               <tr>
                 <th>Roll</th>
+                <th>Section</th>
                 <th>Name</th>
                 <th>GitHub ID</th>
                 <th>Repo Name</th>
@@ -157,6 +159,10 @@
       <form id="editForm" class="submit-form" novalidate>
         <input type="hidden" id="editId" />
         <div class="field-group">
+          <label for="editSection">Section</label>
+          <input type="text" id="editSection" placeholder="e.g. G2H" />
+        </div>
+        <div class="field-group">
           <label for="editRoll">Roll Number</label>
           <input type="text" id="editRoll" />
         </div>
@@ -180,6 +186,6 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <script type="module" src="/app.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
