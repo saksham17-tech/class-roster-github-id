@@ -346,39 +346,88 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Edit form
-  if (elements.editForm) {
+    if (elements.editForm) {
     elements.editForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const id = document.getElementById("editId").value;
-      const student = {
-        id,
-        section: document.getElementById("editSection").value.trim().toUpperCase(), 
-        roll: document.getElementById("editRoll").value.trim(),
-        name: document.getElementById("editName").value.trim(),
-        githubId: document.getElementById("editGithub").value.trim(),
-        repoName: document.getElementById("editRepo").value.trim(),
-        fullLink: `https://github.com/${document.getElementById("editGithub").value.trim()}/${document.getElementById("editRepo").value.trim()}`
-      };
+    e.preventDefault();
+    
+    const id = document.getElementById("editId").value;
+    const editSection = document.getElementById("editSection").value.trim().toUpperCase();
+    const editRoll = document.getElementById("editRoll").value.trim();
+    const editName = document.getElementById("editName").value.trim();
+    const editGithub = document.getElementById("editGithub").value.trim();
+    const editRepo = document.getElementById("editRepo").value.trim();
+    
+    // Validation
+    if (!editRoll || !editName || !editGithub) {
+      showToast("Please fill all required fields", "error");
+      return;
+    }
+    
+    const updatedData = {
+      section: editSection,
+      roll: editRoll,
+      name: editName,
+      githubId: editGithub,
+      repoName: editRepo,
+      fullLink: `https://github.com/${editGithub}/${editRepo}`
+    };
+    
+    // Show loading state
+    const submitBtn = elements.editForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = "Saving...";
+    submitBtn.disabled = true;
+    
+    try {
+      // Update in Supabase
+      const { error } = await supabase
+        .from('roster')
+        .update({
+          section: updatedData.section,
+          roll: updatedData.roll,
+          name: updatedData.name,
+          github_id: updatedData.githubId,
+          repo_name: updatedData.repoName,
+          full_link: updatedData.fullLink
+        })
+        .eq('id', id);
       
-      // Update local array first
+      if (error) {
+        throw error;
+      }
+      
+      // Update local array
       const idx = students.findIndex(s => s.id === id);
       if (idx !== -1) {
-        students[idx] = student;
-        // CHANGED: Sort by section (case-insensitive) then roll
+        students[idx] = { ...students[idx], ...updatedData, id: id };
+        
+        // Resort students
         students.sort((a, b) => {
           const sectionA = (a.section || '').toUpperCase();
           const sectionB = (b.section || '').toUpperCase();
           if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
           return Number(a.roll) - Number(b.roll);
         });
-        renderRoster();
+        
+        // Re-render both views
+        renderRoster(document.getElementById("searchInput")?.value.toLowerCase().trim() || "");
         renderAdminRoster();
+        
+        // Close modals and show success
         closeModal(elements.editModal);
         openModal(elements.adminModal);
-        showToast("✅ Updated successfully", "success");
+        showToast("✅ Updated successfully in database!", "success");
       }
-    });
-  }
+    } catch (error) {
+      console.error("Update error:", error);
+      showToast(`Update failed: ${error.message}`, "error");
+    } finally {
+      // Reset button state
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+}
 
   if (elements.closeEditBtn) {
     elements.closeEditBtn.addEventListener("click", () => {
