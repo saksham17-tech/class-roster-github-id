@@ -8,7 +8,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 let students = [];
 let isAdmin = false;
 let hasSubmitted = false;
-const ADMIN_PASSWORD = "sumo0107";
+const ADMIN_PASSWORD = (() => {
+  return atob("c3VtbzAxMDc=");
+})();
 
 // ── UTILITY FUNCTIONS ──
 function escapeHtml(str) {
@@ -32,13 +34,15 @@ async function loadStudents() {
     const { data, error } = await supabase
       .from('roster')
       .select('*')
-      .order('roll', { ascending: true });
+      .order('section', { ascending: true })  
+      .order('roll', { ascending: true });  
     
     if (error) {
       students = [];
     } else {
       students = data?.map(row => ({
         id: row.id,
+        section: row.section || '',
         roll: row.roll,
         name: row.name,
         githubId: row.github_id,
@@ -46,6 +50,14 @@ async function loadStudents() {
         fullLink: row.full_link,
         date: row.date
       })) || [];
+      
+      // Sorting for case-insensitive section names
+      students.sort((a, b) => {
+        const sectionA = (a.section || '').toUpperCase();
+        const sectionB = (b.section || '').toUpperCase();
+        if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
+        return Number(a.roll) - Number(b.roll);
+      });
     }
   } catch (error) {
     students = [];
@@ -56,6 +68,7 @@ async function saveStudent(student) {
   try {
     const payload = {
       id: student.id,
+      section: student.section,
       roll: student.roll,
       name: student.name,
       github_id: student.githubId,
@@ -76,7 +89,12 @@ async function saveStudent(student) {
     
     if (data && data.length > 0) {
       students.push(data[0]);
-      students.sort((a, b) => Number(a.roll) - Number(b.roll));
+      students.sort((a, b) => {
+        const sectionA = (a.section || '').toUpperCase();
+        const sectionB = (b.section || '').toUpperCase();
+        if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
+        return Number(a.roll) - Number(b.roll);
+      });
       return true;
     }
     return false;
@@ -122,12 +140,13 @@ function renderRoster(filter = "") {
     filtered.forEach(s => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>
-        <td>${escapeHtml(s.name)}</td>
-        <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank" rel="noopener">↗ ${escapeHtml(s.githubId)}</a></td>
-        <td>${escapeHtml(s.repoName)}</td>
-        <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank" rel="noopener">View Repo ↗</a></td>
-        <td><span class="date-text">${escapeHtml(s.date)}</span></td>
+        <td><span class="roll-badge">${escapeHtml(s.roll)}</span>\\
+        <td><span class="section-badge">${escapeHtml(s.section)}</span>\\  <!-- ADDED: Section column -->
+        <td>${escapeHtml(s.name)}\\
+        <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank" rel="noopener">↗ ${escapeHtml(s.githubId)}</a>\\
+        <td>${escapeHtml(s.repoName)}\\
+        <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank" rel="noopener">View Repo ↗</a>\\
+        <td><span class="date-text">${escapeHtml(s.date)}</span>\\
       `;
       rosterBody.appendChild(tr);
     });
@@ -144,15 +163,16 @@ function renderAdminRoster() {
   students.forEach(s => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>
-      <td>${escapeHtml(s.name)}</td>
-      <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank">${escapeHtml(s.githubId)}</a></td>
-      <td>${escapeHtml(s.repoName)}</td>
-      <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank">View ↗</a></td>
+      <td><span class="roll-badge">${escapeHtml(s.roll)}</span>\\
+      <td><span class="section-badge">${escapeHtml(s.section)}</span>\\  <!-- ADDED: Section column in admin view -->
+      <td>${escapeHtml(s.name)}\\
+      <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank">${escapeHtml(s.githubId)}</a>\\
+      <td>${escapeHtml(s.repoName)}\\
+      <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank">View ↗</a>\\
       <td>
         <button class="btn-edit" onclick="window.openEdit('${s.id}')">Edit</button>
         <button class="btn-delete" onclick="window.confirmDelete('${s.id}', '${escapeHtml(s.name)}')">Delete</button>
-      </td>
+       \\
     `;
     adminRosterBody.appendChild(tr);
   });
@@ -164,6 +184,7 @@ window.openEdit = function(id) {
   if (!student) return;
   
   document.getElementById("editId").value = student.id;
+  document.getElementById("editSection").value = student.section || '';
   document.getElementById("editRoll").value = student.roll;
   document.getElementById("editName").value = student.name;
   document.getElementById("editGithub").value = student.githubId;
@@ -234,6 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
       
       const roll = document.getElementById("rollNum").value.trim();
+      const section = document.getElementById("section").value.trim();
       const name = document.getElementById("stuName").value.trim();
       const githubId = document.getElementById("githubId").value.trim();
       const repoUrl = document.getElementById("repoUrl").value.trim();
@@ -243,17 +265,18 @@ document.addEventListener('DOMContentLoaded', async () => {
           repoUrl.includes(" ") || repoUrl.includes("/")) {
         showToast("Please fill all fields correctly", "error");
         return;
-      }
+      }      
 
       const student = {
         id: crypto.randomUUID(),
+        section: section.toUpperCase(),
         roll,
         name,
         githubId,
         repoName: repoUrl,
         fullLink: `https://github.com/${githubId}/${repoUrl}`,
         date: new Date().toLocaleDateString("en-IN", { 
-          day: "2-digit", month: "short", year: "numeric" 
+          day: "2-digit", month: "short", year: "numeric"
         })
       };
 
@@ -329,6 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const id = document.getElementById("editId").value;
       const student = {
         id,
+        section: document.getElementById("editSection").value.trim().toUpperCase(), 
         roll: document.getElementById("editRoll").value.trim(),
         name: document.getElementById("editName").value.trim(),
         githubId: document.getElementById("editGithub").value.trim(),
@@ -340,7 +364,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const idx = students.findIndex(s => s.id === id);
       if (idx !== -1) {
         students[idx] = student;
-        students.sort((a, b) => Number(a.roll) - Number(b.roll));
+        // CHANGED: Sort by section (case-insensitive) then roll
+        students.sort((a, b) => {
+          const sectionA = (a.section || '').toUpperCase();
+          const sectionB = (b.section || '').toUpperCase();
+          if (sectionA !== sectionB) return sectionA.localeCompare(sectionB);
+          return Number(a.roll) - Number(b.roll);
+        });
         renderRoster();
         renderAdminRoster();
         closeModal(elements.editModal);
