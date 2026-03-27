@@ -335,8 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Admin close buttons
   if (elements.closeAdminBtn) {
     elements.closeAdminBtn.addEventListener("click", () => closeModal(elements.adminModal));
-  }
-  
+  }  
   if (elements.logoutBtn) {
     elements.logoutBtn.addEventListener("click", () => {
       isAdmin = false;
