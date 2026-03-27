@@ -139,9 +139,9 @@ function renderRoster(filter = "") {
     emptyState.classList.remove("visible");
     filtered.forEach(s => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>
+      tr.innerHTML = `        
         <td><span class="section-badge">${escapeHtml(s.section)}</span></td>
+        <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>
         <td>${escapeHtml(s.name)}</td>
         <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank" rel="noopener">↗ ${escapeHtml(s.githubId)}</a></td>
         <td>${escapeHtml(s.repoName)}</td>
@@ -163,8 +163,8 @@ function renderAdminRoster() {
   students.forEach(s => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>
       <td><span class="section-badge">${escapeHtml(s.section)}</span></td>
+      <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>      
       <td>${escapeHtml(s.name)}</td>
       <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank">${escapeHtml(s.githubId)}</a></td>
       <td>${escapeHtml(s.repoName)}</td>
