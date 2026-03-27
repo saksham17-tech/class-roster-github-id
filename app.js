@@ -140,13 +140,13 @@ function renderRoster(filter = "") {
     filtered.forEach(s => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><span class="roll-badge">${escapeHtml(s.roll)}</span>\\
-        <td><span class="section-badge">${escapeHtml(s.section)}</span>\\  <!-- ADDED: Section column -->
-        <td>${escapeHtml(s.name)}\\
-        <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank" rel="noopener">↗ ${escapeHtml(s.githubId)}</a>\\
-        <td>${escapeHtml(s.repoName)}\\
-        <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank" rel="noopener">View Repo ↗</a>\\
-        <td><span class="date-text">${escapeHtml(s.date)}</span>\\
+        <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>
+        <td><span class="section-badge">${escapeHtml(s.section)}</span></td>
+        <td>${escapeHtml(s.name)}</td>
+        <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank" rel="noopener">↗ ${escapeHtml(s.githubId)}</a></td>
+        <td>${escapeHtml(s.repoName)}</td>
+        <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank" rel="noopener">View Repo ↗</a></td>
+        <td><span class="date-text">${escapeHtml(s.date)}</span></td>
       `;
       rosterBody.appendChild(tr);
     });
@@ -163,16 +163,16 @@ function renderAdminRoster() {
   students.forEach(s => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><span class="roll-badge">${escapeHtml(s.roll)}</span>\\
-      <td><span class="section-badge">${escapeHtml(s.section)}</span>\\  <!-- ADDED: Section column in admin view -->
-      <td>${escapeHtml(s.name)}\\
-      <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank">${escapeHtml(s.githubId)}</a>\\
-      <td>${escapeHtml(s.repoName)}\\
-      <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank">View ↗</a>\\
+      <td><span class="roll-badge">${escapeHtml(s.roll)}</span></td>
+      <td><span class="section-badge">${escapeHtml(s.section)}</span></td>
+      <td>${escapeHtml(s.name)}</td>
+      <td><a class="github-link" href="https://github.com/${escapeHtml(s.githubId)}" target="_blank">${escapeHtml(s.githubId)}</a></td>
+      <td>${escapeHtml(s.repoName)}</td>
+      <td><a class="repo-link" href="${escapeHtml(s.fullLink)}" target="_blank">View ↗</a></td>
       <td>
         <button class="btn-edit" onclick="window.openEdit('${s.id}')">Edit</button>
         <button class="btn-delete" onclick="window.confirmDelete('${s.id}', '${escapeHtml(s.name)}')">Delete</button>
-       \\
+       </td>
     `;
     adminRosterBody.appendChild(tr);
   });
@@ -335,7 +335,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Admin close buttons
   if (elements.closeAdminBtn) {
     elements.closeAdminBtn.addEventListener("click", () => closeModal(elements.adminModal));
-  }  
+  }
+  
   if (elements.logoutBtn) {
     elements.logoutBtn.addEventListener("click", () => {
       isAdmin = false;
